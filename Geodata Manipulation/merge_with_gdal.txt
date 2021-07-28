@@ -1,0 +1,7 @@
+open osgeo4w shell
+
+py3_env
+
+gdalbuildvrt out.vrt *input.tif
+gdal_translate out.vrt out.tif
+

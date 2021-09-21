@@ -5,3 +5,8 @@ py3_env
 gdalbuildvrt out.vrt *input.tif
 gdal_translate out.vrt out.tif
 
+
+
+
+to change drive in windows shell:
+just enter "e:" to change to other drive, then cd to navigate around

@@ -1,0 +1,22 @@
+raster to polygon
+
+e.g. for polygonizing ndvi vegetation data.
+
+get ndvi data, or vegetation height as raster. non-vegetation points shall be no_data, else they get converted to polygons as well.
+the process works using gdal_polygonize, which puts raster cells with same value into a polygon. This does not work if every cell has a different ndvi or height value. so use the raster calculator and set values >=0 to =1 (cells with data = 1). 
+
+use gdal_polygonize, in QGIS via Raster -> Convert -> Vectorize.
+run it. Can take a long time.
+
+
+this creates polygons that are mostly connected and have straight edges (due to raster cell boundaries being rectangular). You can smooth them (best guess) by using grass utility v.generalize, and use the Chaiken algorithm. This will create nice polygons with rounder boundaries.
+
+To get vegetation height into the polygons, do zonal statistics with a DOM raster, probably using a high percentile, as the polygon may contain some 0 or no-data values used for statistics. And before that, cut very large connected tree patches into subsets. 
+
+
+
+
+
+idea vor vegetation:
+work with ndvi data of kanton zh
+and work with dom-dtm from kanton zh to get height into it. or directly vegetation height of kanton zh

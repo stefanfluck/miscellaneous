@@ -1,0 +1,10 @@
+for kanton zürich:
+
+get AV data
+
+split av data into veg, pav files with the python script in this folder
+
+for buildings: heights are not available directly outside of zurich. use zonal statistics for that. there, no correction required (due to definitions in zurich).
+
+vegetation: works fine with nDOM_veg heights, polygonize then, and so on as described in other txt file.
+

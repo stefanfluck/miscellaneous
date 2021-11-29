@@ -5,6 +5,7 @@ py3_env
 gdalbuildvrt out.vrt *input.tif
 gdal_translate out.vrt out.tif
 
+option -tr 1 1 macht noch ein resample beim gdal_translate
 
 
 

@@ -1,0 +1,18 @@
+[
+    "2693_1262.las",
+    {
+        "type":"filters.range",
+        "limits":"Classification[2:2], Classification[9:9]"
+    },
+    {
+        "type":"writers.las",
+        "filename":"filtered_pipeline4.las"
+    },
+    {
+        "resolution": 1,
+        "radius": 1.414,
+        "gdaldriver": "GTiff",
+        "output_type": ["mean", "min", "max"],
+        "filename":"outputfile4.tif"
+    }
+]

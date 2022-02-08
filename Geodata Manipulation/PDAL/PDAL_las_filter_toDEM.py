@@ -63,11 +63,11 @@ tiles = tiles[0:2]
 
 
 
-#%% iterate over tiles modularized
+#%% iterate over tiles for las2dem modularized
 
 def select_points_and_raster(file, do, resolution):
     filename_out = file.split('.')[0]+'_'+ str(do) +'.tif'
-    config = json.dumps([ tiles[i], 
+    config = json.dumps([ file, 
                          {'type':'filters.range', 'limits':classification[do]},
                          {'resolution':resolution, 'radius':resolution*1.414, 
                           'gdaldriver':'GTiff', 
@@ -79,7 +79,7 @@ def select_points_and_raster(file, do, resolution):
     pipeline.execute()
     return filename_out
 
-#execute it
+#execute it serially
 for i in range(len(tiles)):
     print(f'do file {tiles[i]}')
     filename_out = select_points_and_raster(tiles[i], do, resolution)
@@ -89,10 +89,23 @@ for i in range(len(tiles)):
 #%% iterate over tiles for las2dem parallelized
 
 
+# from multiprocess import Pool
+# ncores = 4
+# # tiles_split = np.array_split(tiles, ncores)
+
+# pool = Pool(processes=ncores)
+
+# pool.starmap(select_points_and_raster, [
+#              [file for file in tiles], do, resolution])
+
+# pool.close()
+# pool.join()
 
 
 #%% gdal build vrt
 merged_dem_name = casename+'_'+str(do)+'.tif'
+keep_tiles_after_merge = True
+
 
 print('Start merging multiple tiles:\n')
 if len(tiles) > 1:
@@ -108,7 +121,10 @@ if len(tiles) > 1:
     
     os.remove("merge.vrt")
     print('Merging finished and wrote {}'.format(casename+'_'+str(do)+'.tif'))
-    _= [os.remove(file) for file in tiles_to_merge]
+    
+    if keep_tiles_after_merge == False:
+        _= [os.remove(file) for file in tiles_to_merge]
+    
 elif len(tiles) == 1:
     print('INFO: Only one file, nothing to merge. Skipping merging step, '
           'but renaming {} to {}'.format(filename_out,

@@ -16,13 +16,6 @@ buildvrt basically in python
 
 """
 
-
-
-import os
-import glob
-import json
-import pdal
-
 do = 'ground' #refer to below dict which is avbl
 casename = 'winterthur' #will be prepended to output files
 resolution = 1 #meter
@@ -33,13 +26,25 @@ classification = {'ground':'Classification[2:2],Classification[9:9]',
                   'bridges':'Classification[17:17]',
                   'build_brdg':'Classification[6:6],Classification[17:17]'}
 
+
+
+import os
+import glob
+import json
+import pdal
+from osgeo import gdal
+import rasterio
+from rasterio.fill import fillnodata
+import numpy as np
+
 #%% create list of tiles to process
 tiles = []
 for file in glob.glob("*.las"):
     tiles.append(file)
 
 tiles = [tiles[-1]]
-#%%
+
+#%% iterate over tiles
 for i in range(len(tiles)):
     print(f'do file {tiles[i]}')
     filename_out = tiles[i].split('.')[0]+'_'+ str(do) +'.tif'
@@ -47,7 +52,7 @@ for i in range(len(tiles)):
                          {'type':'filters.range', 'limits':classification[do]},
                          {'resolution':resolution, 'radius':resolution*1.414, 
                           'gdaldriver':'GTiff', 
-                          'output_type':['mean','min','max'], 
+                          'output_type':['mean'], 
                           'filename':filename_out}
                          ])
     
@@ -64,7 +69,6 @@ if len(tiles)>1:
 
     tiles_to_merge = [tile.split('.')[0]+'_'+str(do)+'.tif' for tile in tiles]
     
-    from osgeo import gdal
     vrt = gdal.BuildVRT('merge.vrt', tiles_to_merge)
     vrt = None
     
@@ -79,12 +83,33 @@ else:
                                          merged_dem_name))
     os.rename(filename_out, merged_dem_name)
 
-#%% fill holes in boden
-merged_filled_name = '_filled.'.join(merged_dem_name.split('.'))
 
-fill = gdal.Grid(merged_filled_name, 
-                 merged_dem_name)
-fill=None
+#%% fill holes for ground
+if do == 'ground':
+    merged_filled_name = '_filled.'.join(merged_dem_name.split('.'))
+    
+    
+    with rasterio.open(merged_dem_name) as ras:
+        profile = ras.profile
+        mask = ras.read(1)
+        mas = np.where(mask[:,:] == -9999, 0, mask[:,:])
+        filled = fillnodata(ras.read(1), mask=mas)
+    
+    profile['count'] = 1
+    
+    with rasterio.open(merged_filled_name, 'w', **profile) as dest:
+        dest.write_band(1, filled)
+
+    os.remove(merged_dem_name)
+
+
+
+
+
+
+
+
+
 
 
 

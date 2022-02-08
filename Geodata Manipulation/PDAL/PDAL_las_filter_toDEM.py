@@ -42,12 +42,31 @@ tiles = []
 for file in glob.glob("*.las"):
     tiles.append(file)
 
-tiles = [tiles[-1]]
+#for debugging
+tiles = tiles[0:2]
 
 #%% iterate over tiles
-for i in range(len(tiles)):
-    print(f'do file {tiles[i]}')
-    filename_out = tiles[i].split('.')[0]+'_'+ str(do) +'.tif'
+# for i in range(len(tiles)):
+#     print(f'do file {tiles[i]}')
+#     filename_out = tiles[i].split('.')[0]+'_'+ str(do) +'.tif'
+#     config = json.dumps([ tiles[i], 
+#                          {'type':'filters.range', 'limits':classification[do]},
+#                          {'resolution':resolution, 'radius':resolution*1.414, 
+#                           'gdaldriver':'GTiff', 
+#                           'output_type':['mean'], 
+#                           'filename':filename_out}
+#                          ])
+    
+#     pipeline = pdal.Pipeline(config)
+#     pipeline.execute()
+#     print(f'finished and wrote {filename_out}')
+
+
+
+#%% iterate over tiles modularized
+
+def select_points_and_raster(file, do, resolution):
+    filename_out = file.split('.')[0]+'_'+ str(do) +'.tif'
     config = json.dumps([ tiles[i], 
                          {'type':'filters.range', 'limits':classification[do]},
                          {'resolution':resolution, 'radius':resolution*1.414, 
@@ -58,13 +77,25 @@ for i in range(len(tiles)):
     
     pipeline = pdal.Pipeline(config)
     pipeline.execute()
+    return filename_out
+
+#execute it
+for i in range(len(tiles)):
+    print(f'do file {tiles[i]}')
+    filename_out = select_points_and_raster(tiles[i], do, resolution)
     print(f'finished and wrote {filename_out}')
+
+
+#%% iterate over tiles for las2dem parallelized
+
+
+
 
 #%% gdal build vrt
 merged_dem_name = casename+'_'+str(do)+'.tif'
 
 print('Start merging multiple tiles:\n')
-if len(tiles)>1:
+if len(tiles) > 1:
     print('Multiple tiles found. Merging now.')
 
     tiles_to_merge = [tile.split('.')[0]+'_'+str(do)+'.tif' for tile in tiles]
@@ -77,15 +108,19 @@ if len(tiles)>1:
     
     os.remove("merge.vrt")
     print('Merging finished and wrote {}'.format(casename+'_'+str(do)+'.tif'))
-else:
+    _= [os.remove(file) for file in tiles_to_merge]
+elif len(tiles) == 1:
     print('INFO: Only one file, nothing to merge. Skipping merging step, '
           'but renaming {} to {}'.format(filename_out,
                                          merged_dem_name))
     os.rename(filename_out, merged_dem_name)
+else: 
+    raise FileNotFoundError('Tile list is empty.')
 
 
 #%% fill holes for ground
 if do == 'ground':
+    print('Ground file was done, filling holes now.')
     merged_filled_name = '_filled.'.join(merged_dem_name.split('.'))
     
     
@@ -101,6 +136,7 @@ if do == 'ground':
         dest.write_band(1, filled)
 
     os.remove(merged_dem_name)
+    print(f'Finished filling holes, wrote {merged_filled_name}')
 
 
 

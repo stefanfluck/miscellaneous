@@ -88,18 +88,36 @@ for i in range(len(tiles)):
 
 #%% iterate over tiles for las2dem parallelized
 
+# def select_points_and_raster(tilelist, do, resolution):
+#     for file in tilelist:
+#         filename_out = file.split('.')[0]+'_'+ str(do) +'.tif'
+#         import json
+#         config = json.dumps([ file, 
+#                              {'type':'filters.range', 'limits':do},
+#                              {'resolution':resolution, 'radius':resolution*1.414, 
+#                               'gdaldriver':'GTiff', 
+#                               'output_type':['mean'], 
+#                               'filename':filename_out}
+#                              ])
+        
+#         pipeline = pdal.Pipeline(config)
+#         pipeline.execute()
+#         return filename_out
+
 
 # from multiprocess import Pool
-# ncores = 4
+# ncores = 2
 # # tiles_split = np.array_split(tiles, ncores)
 
 # pool = Pool(processes=ncores)
 
-# pool.starmap(select_points_and_raster, [
-#              [file for file in tiles], do, resolution])
+# pool.starmap(select_points_and_raster, 
+#               [([file for file in tiles], classification[do], resolution)])
 
 # pool.close()
 # pool.join()
+
+
 
 
 #%% gdal build vrt

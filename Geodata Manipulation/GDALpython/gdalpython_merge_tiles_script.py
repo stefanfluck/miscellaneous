@@ -8,12 +8,12 @@
 # - Output: merged raster file with target resolution
 
 # ### Define paths
-tilelist = r'C:/Users/fluf/Desktop/files/ch.swisstopo.swissimage-dop10-zBTmxlHK.csv'
-wd = r'C:/Users/fluf/Desktop/files'
+tilelist = r'C:/Users/fluf/Downloads/ch.swisstopo.swissalti3d-ZfxggJO0.csv'
+wd = r'C:/Users/fluf/Downloads'
 
 
 # ### set names
-merged_dem_name = 'zuerich_swissalti3d_2m_cut.tif'
+merged_dem_name = 'adelbodenregion_swissalti3d_2m_2056.tif'
 keep_tiles_after_merge = False
 
 import os
@@ -40,16 +40,17 @@ with open(tilelist) as f:
 
 tilelist = [line.rstrip() for line in tilelist]
 
-import wget
+
 os.chdir(wd)
-it = 0
+it = 1
 
-
+import requests
 for file in tilelist:
     print('\ndownloading file nr {} / {}'.format(it, len(tilelist)))
-    wget.download(file)
+    r = requests.get(file, allow_redirects=True)
+    open(file.split('/')[-1], 'wb').write(r.content)
     it += 1
-    
+
 
 
 # Make List of Tiles

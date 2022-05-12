@@ -47,9 +47,13 @@ it = 1
 import requests
 for file in tilelist:
     print('\ndownloading file nr {} / {}'.format(it, len(tilelist)))
-    r = requests.get(file, allow_redirects=True)
-    open(file.split('/')[-1], 'wb').write(r.content)
+    
+    with open(file.split('/')[-1], 'wb') as f:
+        r = requests.get(file, allow_redirects=True)
+        f.write(r.content)
+        
     it += 1
+
 
 
 

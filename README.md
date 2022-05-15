@@ -1,3 +1,4 @@
-# ByStefanFluck
+Some miscellaneous code snippeds. 
 
-Hi!
+Geodata Manipulation folder contains some very useful stuff: GDAL, PDAL, Processes, etc. 
+
